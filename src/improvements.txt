@@ -1,0 +1,16 @@
+----------------
+     ADMIN
+----------------
+
+profile info -users-admin can get all users
+-admin should able to approve the stories added by user 
+   approved stories are shown in website
+-Admin checks the comments and can delete the spot from the website
+
+--------------------
+       USER
+--------------------
+
+-user should able to save,like,share the spots or stories uploaded by others to their profile page
+-insert an other page to add comments (if the spot is temporiraly closed or not) 
+-make the all spots page in an instagram posts style,remove card model
