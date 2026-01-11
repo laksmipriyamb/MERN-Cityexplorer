@@ -1,29 +1,51 @@
 import { CheckCircle, XCircle, User, Mail } from "lucide-react";
+import { useEffect, useState } from "react";
+import { getAllStoriesAdminAPI, updateStoryStatusAPI } from "../../server/allAPI";
+import serverURL from "../../server/serverURL";
+import { toast, ToastContainer } from "react-toastify";
+
 
 export default function AdminApproveStories() {
     // Dummy data – replace with API response
-    const stories = [
-        {
-            id: 1,
-            title: "Sunset at Varkala",
-            description:
-                "The sunset view from Varkala cliff was breathtaking. Calm waves, golden sky and peaceful vibes.",
-            user: "Anu Thomas",
-            email: "anu.thomas@gmail.com",
-            spot: "Varkala Cliff",
-            image: "/tourist.webp",
-        },
-        {
-            id: 2,
-            title: "Morning Coffee Bliss",
-            description:
-                "Cafe Aroma has the best cappuccino in town. Cozy ambience and friendly staff.",
-            user: "Rahul S",
-            email: "rahul.s@gmail.com",
-            spot: "Cafe Aroma",
-            image: "/cafe1.webp",
-        },
-    ];
+    const [allStories, setAllStories] = useState([])
+
+    useEffect(() => {
+        const token = sessionStorage.getItem("token")
+        if (token) {
+            getAllStories(token)
+        }
+    }, [])
+
+    const getAllStories = async (token) => {
+        const reqHeader = {
+            'Authorization': `Bearer ${token}`
+        }
+        const result = await getAllStoriesAdminAPI(reqHeader)
+        if (result.status == 200) {
+            setAllStories(result.data)
+        } else {
+            console.log(result);
+
+        }
+    }
+
+    const updateStoryStatus = async (id) => {
+        const token = sessionStorage.getItem("token")
+        if (token) {
+            const reqHeader = {
+                'Authorization': `Bearer ${token}`
+            }
+            const result = await updateStoryStatusAPI(id, reqHeader)
+            if (result.status == 200) {
+                toast.success("Story Status updated!!!")
+                getAllStories(token)
+            } else {
+                console.log(result);
+
+            }
+        }
+    }
+
 
     return (
         <section
@@ -54,9 +76,9 @@ export default function AdminApproveStories() {
 
             {/* STORIES LIST */}
             <div className="relative max-w-6xl mx-auto space-y-8">
-                {stories.map((story) => (
+                {allStories.map((story) => (
                     <div
-                        key={story.id}
+                        key={story?._id}
                         className="p-[2px] rounded-2xl
               bg-gradient-to-br from-orange-600 via-orange-500 to-yellow-400
               shadow-xl"
@@ -67,8 +89,8 @@ export default function AdminApproveStories() {
 
                                 {/* IMAGE */}
                                 <img
-                                    src={story.image}
-                                    alt={story.title}
+                                    src={`${serverURL}/uploads/${story?.uploadImage}`}
+                                    alt={story?.title}
                                     className="w-full h-60 md:h-full object-cover py-3 ps-3 rounded-4xl"
                                 />
 
@@ -76,49 +98,41 @@ export default function AdminApproveStories() {
                                 <div className="md:col-span-2 p-6 flex flex-col justify-between">
                                     <div className="space-y-3">
                                         <h3 className="text-xl font-semibold text-gray-800">
-                                            {story.title}
+                                            {story?.title}
                                         </h3>
 
                                         <p className="text-sm text-gray-600 line-clamp-4">
-                                            {story.description}
+                                            {story?.caption}
                                         </p>
 
                                         {/* USER DETAILS */}
                                         <div className="flex flex-wrap gap-6 text-sm text-gray-500 mt-2">
                                             <span className="inline-flex items-center gap-2">
                                                 <User size={16} className="text-orange-500" />
-                                                {story.user}
+                                                {story?.publisher?.username}
                                             </span>
 
                                             <span className="inline-flex items-center gap-2">
                                                 <Mail size={16} className="text-orange-500" />
-                                                {story.email}
+                                                {story?.publisher?.email}
                                             </span>
 
                                             <span className="font-medium text-gray-600">
-                                                Spot: {story.spot}
+                                                Spot: {story?.spotname}
                                             </span>
 
                                         </div>
                                         {/* ACTION BUTTONS */}
                                         <div className="flex gap-4 mt-6">
-                                            <button
-                                                className="inline-flex items-center gap-2
-                        px-5 py-2.5 rounded-lg text-green-500
-                        hover:bg-green-200 transition"
-                                            >
-                                                <CheckCircle size={18} />
-                                                Approve
+                                            {story?.status != "approved" ?
+                                            <button  onClick={()=>{updateStoryStatus(story?._id)}} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-green-500 hover:bg-green-200 transition">
+                                                <CheckCircle size={18} /> Approve
                                             </button>
-
-                                            <button
-                                                className="inline-flex items-center gap-2
-                        px-5 py-2.5 rounded-lg  text-red-500
-                        hover:bg-red-200 transition"
-                                            >
-                                                <XCircle size={18} />
-                                                Reject
+                                            :
+                                            <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-green-500 hover:bg-green-200 transition">
+                                                <img width={'30px'} height={'30px'} src="https://i.pinimg.com/originals/b0/e0/e9/b0e0e9129ef97614535d929a43831956.gif" alt="approved" /> Approved
                                             </button>
+                                            }
                                         </div>
                                     </div>
 
@@ -130,6 +144,8 @@ export default function AdminApproveStories() {
                     </div>
                 ))}
             </div>
+            {/* toast */}
+                      <ToastContainer position="top-center" autoClose={2000} theme="colored" />
         </section>
     );
 }

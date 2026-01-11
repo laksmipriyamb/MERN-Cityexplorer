@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MapPin, ImagePlus } from "lucide-react";
 import { FaPlug, FaPlus } from "react-icons/fa";
+import { toast, ToastContainer } from "react-toastify";
+import { addSpotAPI, getSpotDetailsByIdAPI, UpdateSpotAPI } from "../../server/allAPI";
+import { useNavigate, useParams } from "react-router-dom";
+import serverURL from "../../server/serverURL";
 
 export default function AdminAddSpot() {
   const [spotDetails, setSpotDetails] = useState({
@@ -8,22 +12,25 @@ export default function AdminAddSpot() {
   })
   console.log(spotDetails);
 
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const isEdit = Boolean(id)
+
+  useEffect(() => {
+    if (id) {
+      fetchSpotDetails();
+    }
+  }, [id]);
+
   const [preview, setPreview] = useState("")
   const [previewList, setPreviewList] = useState([])
 
   //state for coverimage
   const [coverPreview, setCoverPreview] = useState(null)
-
-
-  const [thumbnail, setThumbnail] = useState(null);
   const [galleryImages, setGalleryImages] = useState([]);
 
-  const handleThumbnail = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setThumbnail(URL.createObjectURL(file));
-    }
-  };
+
+
 
   const handleCoverImage = (e) => {
     const file = e.target.files[0];
@@ -39,20 +46,160 @@ export default function AdminAddSpot() {
   };
 
   const handleGalleryImages = (e) => {
+
     //get file which upload
-    console.log(e.target.files[0]);
-    //add to file to state
-    const imgFileArray = spotDetails.galleryImages
-    imgFileArray.push(e.target.files[0])
-    setSpotDetails({ ...spotDetails, galleryImages: imgFileArray })
-    // convert file to url
-    const url = URL.createObjectURL(e.target.files[0])
-    console.log(url);
-    setPreview(url)
-    // for list of uploaded images display
-    const spotImagesArray = previewList
-    spotImagesArray.push(url)
-    setPreviewList(spotImagesArray)
+        console.log(e.target.files[0]);
+        //add to file to state
+        const imgFileArray = spotDetails.galleryImages
+        imgFileArray.push(e.target.files[0])
+        setSpotDetails({...spotDetails,galleryImages:imgFileArray})
+        // convert file to url
+        const url = URL.createObjectURL(e.target.files[0])
+        console.log(url);
+        setGalleryImages(url)
+        // for list of uploaded images display
+        const spotImagesArray = galleryImages
+        spotImagesArray.push(url)
+        setGalleryImages(spotImagesArray)
+  };
+
+  const handleAddSpot = async (e) => {
+    e.preventDefault();
+    const { spotname, category, location, description, bestTime, coverImage, galleryImages } = spotDetails
+    if (!spotname || !category || !location || !description || !bestTime || !coverImage || galleryImages.length == 0) {
+      toast.warning("Please fill the form completely...")
+    } else {
+      //api call
+      const token = sessionStorage.getItem("token")
+      if (token) {
+        const reqHeader = {
+          "Authorization": `Bearer ${token}`
+        }
+        const reqBody = new FormData()
+        for (let key in spotDetails) {
+          if (key != "galleryImages") {
+            reqBody.append(key, spotDetails[key])
+          } else {
+            spotDetails.galleryImages.forEach(imgFile => {
+              reqBody.append("galleryImages", imgFile)
+            })
+          }
+        }
+        const result = await addSpotAPI(reqBody, reqHeader)
+        console.log(result);
+        if (result.status == 200) {
+          toast.success("Spot Added Successfullt...")
+        } else if (result.status == 401) {
+          toast.warning(result.response.data)
+        } else {
+          toast.error("Something went wrong!!!")
+        }
+        clearAllAddSpotForm()
+
+      }
+
+    }
+  }
+
+  //edit part
+
+  const fetchSpotDetails = async () => {
+    const token = sessionStorage.getItem("token");
+
+    if (!token) return;
+
+    const reqHeader = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    try {
+      const result = await getSpotDetailsByIdAPI(id, reqHeader);
+
+      if (result.status === 200) {
+        console.log("Spot API response:", result.data);
+
+        const data = result.data;
+
+
+        setSpotDetails({
+          spotname: result.data.spotname || "",
+          category: result.data.category || "",
+          location: result.data.location || "",
+          description: result.data.description || "",
+          bestTime: result.data.bestTime || "",
+          coverImage: null,        // user uploads new one
+          galleryImages: []        // ONLY new uploads go here
+        });
+
+        // previews from backend
+        setCoverPreview(`${serverURL}/uploads/${result.data.coverImage}`);
+
+        const galleryPreviewURLs = (result.data.galleryImages || []).map(
+          img => `${import.meta.env.VITE_SERVER_URL}/uploads/${img}`
+        );
+
+        setPreviewList(galleryPreviewURLs);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+
+
+
+
+  const handleUpdateSpot = async (e) => {
+    e.preventDefault();
+    const token = sessionStorage.getItem("token");
+    if (!token) return;
+
+    const reqHeader = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    const reqBody = new FormData();
+
+    // text fields
+    reqBody.append("spotname", spotDetails.spotname);
+    reqBody.append("category", spotDetails.category);
+    reqBody.append("location", spotDetails.location);
+    reqBody.append("description", spotDetails.description);
+    reqBody.append("bestTime", spotDetails.bestTime);
+
+    // cover image (only if changed)
+    if (spotDetails.coverImage) {
+      reqBody.append("coverImage", spotDetails.coverImage);
+    }
+
+    // gallery images (only new ones)
+    spotDetails.galleryImages.forEach((img) => {
+      reqBody.append("galleryImages", img);
+    });
+
+    try {
+      const result = await UpdateSpotAPI(id, reqBody, reqHeader);
+
+      if (result.status === 200) {
+        toast.success("Spot updated successfully");
+
+      } else {
+        toast.error("Update failed");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong");
+    }
+  }
+
+  const clearAllAddSpotForm = () => {
+    setSpotDetails({
+      spotname: "", category: "", location: "", description: "", bestTime: "", coverImage: null, galleryImages: []
+    })
+    setPreview("")
+    setCoverPreview("")
+    setGalleryImages([])
+
   }
 
   return (
@@ -73,7 +220,7 @@ export default function AdminAddSpot() {
       {/* HEADER */}
       <div className="relative max-w-4xl mx-auto mb-10 border-l-4 border-orange-600 pl-4">
         <h1 className="text-3xl font-semibold text-gray-900">
-          Add New Spot
+          {isEdit ? "Edit Spot" : " Add New Spot"}
         </h1>
         <p className="text-gray-700 mt-2">
           Create and publish cafes, restaurants, hotels & tourist places.
@@ -95,7 +242,7 @@ export default function AdminAddSpot() {
               </label>
               <input value={spotDetails.spotname} onChange={e => setSpotDetails({ ...spotDetails, spotname: e.target.value })}
                 type="text"
-                placeholder="Cafe Aroma"
+                placeholder="Spot Name"
                 className="w-full px-4 py-3 rounded-lg border
                 focus:ring-2 focus:ring-orange-500 outline-none"
               />
@@ -113,7 +260,7 @@ export default function AdminAddSpot() {
                 <option>Select category</option>
                 <option>Cafe</option>
                 <option>Restaurant</option>
-                <option>Hotel</option>
+                <option>Resorts</option>
                 <option>Tourist Spot</option>
                 <option>Hidden Spot</option>
               </select>
@@ -128,7 +275,7 @@ export default function AdminAddSpot() {
                 <MapPin size={18} className="text-orange-600" />
                 <input value={spotDetails.location} onChange={e => setSpotDetails({ ...spotDetails, location: e.target.value })}
                   type="text"
-                  placeholder="Kochi, Kerala"
+                  placeholder="Place"
                   className="flex-1 px-4 py-3 rounded-lg border
                   focus:ring-2 focus:ring-orange-500 outline-none"
                 />
@@ -155,7 +302,7 @@ export default function AdminAddSpot() {
               </label>
               <input value={spotDetails.bestTime} onChange={e => setSpotDetails({ ...spotDetails, bestTime: e.target.value })}
                 type="text"
-                placeholder="October – March"
+                placeholder="Give Month or Time"
                 className="w-full px-4 py-3 rounded-lg border
                 focus:ring-2 focus:ring-orange-500 outline-none"
               />
@@ -174,13 +321,13 @@ export default function AdminAddSpot() {
                   hover:border-orange-500 hover:text-orange-500 transition"
                 >
 
-                  {coverPreview?
-                  <img src={coverPreview} alt="Thumbnail" />
-                :
-                <div className="flex flex-col items-center gap-2">
-                    <ImagePlus size={32} />
-                    <span className="text-sm">Upload Thumbnail</span>
-                  </div>
+                  {coverPreview ?
+                    <img className="w-100 h-40" src={coverPreview} alt="Thumbnail" />
+                    :
+                    <div className="flex flex-col items-center gap-2">
+                      <ImagePlus size={32} />
+                      <span className="text-sm">Upload Thumbnail</span>
+                    </div>
                   }
 
                 </div>
@@ -273,25 +420,42 @@ export default function AdminAddSpot() {
             {/* ACTION BUTTONS */}
             <div className="flex justify-end gap-4 pt-6 border-t">
               <button
+                onClick={clearAllAddSpotForm}
                 type="button"
                 className="px-6 py-2.5 rounded-lg border
                 text-gray-600 hover:bg-gray-100 transition"
               >
-                Cancel
+                Clear All
               </button>
 
-              <button
-                type="submit"
-                className="px-8 py-2.5 rounded-lg bg-orange-600
+              {isEdit ?
+                <button
+                  onClick={handleUpdateSpot}
+                  type="submit"
+                  className="px-8 py-2.5 rounded-lg bg-orange-600
                 text-white font-medium hover:bg-orange-700 transition"
-              >
-                Publish Spot
-              </button>
+                >
+                  Update Spot
+                </button>
+                :
+                <button
+                  onClick={handleAddSpot}
+
+                  type="submit"
+                  className="px-8 py-2.5 rounded-lg bg-orange-600
+                text-white font-medium hover:bg-orange-700 transition"
+                >
+                  Publish Spot
+                </button>
+              }
             </div>
 
           </form>
         </div>
       </div>
+      {/* toast */}
+      <ToastContainer position="top-center" autoClose={2000} theme="colored" />
+
     </section>
   );
 }

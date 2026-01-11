@@ -6,6 +6,7 @@ import { FaBars, FaXmark } from "react-icons/fa6";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import { Link } from "react-router-dom";
 import Tooltip from "@mui/material/Tooltip";
+import serverURL from "../server/serverURL";
 
 function Header() {
   const [open, setOpen] = useState(false);
@@ -13,7 +14,7 @@ function Header() {
   const [token, setToken] = useState("")
 
   console.log(dp);
-  
+
   useEffect(() => {
     if (sessionStorage.getItem("token")) {
       const userToken = sessionStorage.getItem("token")
@@ -22,6 +23,12 @@ function Header() {
       setDp(user.picture)
     }
   }, [token])
+
+  const logOut = () => {
+    sessionStorage.clear()
+    setToken("")
+    setDp("")
+  }
 
   return (
     <>
@@ -59,7 +66,10 @@ function Header() {
             <Link to={'/allspots'} className="nav-link">DESTINATIONS</Link>
             <Link className="nav-link">ABOUT US</Link>
             <Link to={'/allstories'} className="nav-link">BLOGS</Link>
-            <Link className="nav-link">SERVICES</Link>
+            <Link onClick={(e) => {
+              e.preventDefault();
+              window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth", })
+            }} className="nav-link">SERVICES</Link>
           </div>
 
           {/* ACTIONS */}
@@ -75,10 +85,10 @@ function Header() {
                 <div className="flex justify-center gap-3 items-center mx-3">
                   <Tooltip title="Go to Profile">
                     <Link to={'/profile'}>
-                      <img width={'50px'} height={'50px'} style={{borderRadius:"50%"}} src={dp?dp:"https://e7.pngegg.com/pngimages/178/595/png-clipart-user-profile-computer-icons-login-user-avatars-monochrome-black-thumbnail.png"} alt="profile" />
+                      <img width={'50px'} height={'50px'} style={{ borderRadius: "50%" }} src={dp ? dp.startsWith("https://lh3.googleusercontent.com/") ? dp : `${serverURL}/uploads/${dp}` : "https://www.pngall.com/wp-content/uploads/5/Profile-PNG-File.png"} />
                     </Link>
                   </Tooltip>
-                  <Tooltip title="Logout"><LogOutIcon size={30} className="text-orange-500"/></Tooltip>
+                  <Tooltip title="Logout"><LogOutIcon onClick={logOut} size={30} className="text-orange-500" /></Tooltip>
                 </div>
             }
           </div>
@@ -116,11 +126,11 @@ function Header() {
 
         {/* SIDEBAR LINKS */}
         <ul className="ps-5 pt-10 space-y-8 font-semibold text-xl">
-          <li className="sidebar-link flex gap-2 items-center"><Coffee />Cafe</li>
-          <li className="sidebar-link flex gap-2 items-center"><UtensilsCrossed /> Resturants</li>
-          <li className="sidebar-link flex gap-2 items-center"><EarthIcon />Hidden Spots</li>
-          <li className="sidebar-link flex gap-2 items-center"><EarthIcon />Tourist Spots</li>
-          <li className="text-red-500 cursor-pointer flex gap-2 items-center"><LogOutIcon /><button>Logout</button></li>
+          <li className="sidebar-link"><Link to={'/allspots'} className="flex gap-2 items-center"><Coffee />Cafe</Link></li>
+          <li className="sidebar-link"><Link to={'/allspots'} className="flex gap-2 items-center"><UtensilsCrossed /> Resturants</Link></li>
+          <li className="sidebar-link"><Link to={'/allspots'} className="flex gap-2 items-center"><EarthIcon />Hidden Spots</Link></li>
+          <li className="sidebar-link"><Link to={'/allspots'} className="flex gap-2 items-center"><EarthIcon />Tourist Spots</Link></li>
+          <li className="text-red-500 cursor-pointer flex gap-2 items-center"><LogOutIcon /><button onClick={logOut}>Logout</button></li>
         </ul>
       </aside>
 

@@ -3,6 +3,8 @@ import { Star, MapPin, ImagePlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import NotLogin from "../components/NotLogin";
+import Header from "../components/Header";
+import HeadPortion from "../components/HeadPortion";
 
 export default function AddReview() {
   const navigate = useNavigate();
@@ -21,6 +23,7 @@ export default function AddReview() {
 
   return (
     <>
+  <HeadPortion/>
       {token?
         <section
         className="relative min-h-screen bg-cover bg-center bg-fixed flex items-center justify-center px-4"
@@ -33,7 +36,7 @@ export default function AddReview() {
         <div className="absolute inset-0 bg-black/40"></div>
   
         {/* CONTENT */}
-        <div className="relative z-10 w-full max-w-3xl bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl p-8 md:p-12 my-3">
+        <div className="relative z-10 w-full max-w-3xl bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl p-8 md:p-12 mt-28">
   
           {/* HEADER */}
           <div className="mb-10 text-center">

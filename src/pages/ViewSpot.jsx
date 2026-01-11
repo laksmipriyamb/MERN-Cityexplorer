@@ -2,36 +2,72 @@ import { MapPin, Star, Heart, Share2, Send } from "lucide-react";
 import { useEffect } from "react";
 import { useState } from "react";
 import NotLogin from "../components/NotLogin";
+import { getSpotDetailsByIdAPI, loginAPI } from "../server/allAPI";
+import { Link, useParams } from "react-router-dom";
+import serverURL from "../server/serverURL";
+import { jwtDecode } from "jwt-decode";
 
 export default function ViewSpot() {
    const [token,setToken] = useState("")
+   const [viewDetails,setViewDetails] = useState({})
+   console.log(viewDetails);
+   
+   const [role,setRole] = useState("")
+   console.log(role);
+   
+
+   const {id} = useParams()
   
-    useEffect(()=>{
-      if(sessionStorage.getItem("token")){
-        const userToken = sessionStorage.getItem("token")
-        setToken(userToken)
+   useEffect(()=>{
+    if(id){
+      getSpotDetails(id)
+      const token = sessionStorage.getItem("token")
+      if(token){
+        const decode = jwtDecode(token)
+        setRole(decode.role)
       }
-    },[])
+    }
+   },[id])
+
+   
+
+    const getSpotDetails = async (id)=>{
+      const token = sessionStorage.getItem("token")
+      if(token){
+        const reqHeader = {
+          'Authorization' : `Bearer ${token}`
+        }
+        const result = await getSpotDetailsByIdAPI(id,reqHeader)
+        console.log(result);
+        if(result.status==200){
+          setViewDetails(result.data)
+        }else{
+          console.log(result);
+          
+        }
+        
+      }
+    }
   return (
     <>
-      {token?
+     
         <section className="bg-[#faf7f2] min-h-screen">
   
         {/* 🌅 HERO IMAGE */}
         <div className="relative h-[50vh]">
           <img
-            src="/cafearoma.jpg"
+            src={`${serverURL}/uploads/${viewDetails.coverImage}`}
             alt="Spot"
-            className="w-full h-full object-cover"
+            className="w-full h-full bg-fixed object-cover"
           />
           <div className="absolute inset-0 bg-black/40"></div>
   
           <div className="absolute bottom-8 left-6 md:left-16 text-white">
             <span className="bg-orange-500 px-4 py-1 rounded-full text-sm">
-              spot category
+              {viewDetails.category}
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mt-3">
-              Spot Name
+              {viewDetails.spotname}
             </h1>
   
             <div className="flex items-center gap-4 mt-3 text-sm">
@@ -41,7 +77,7 @@ export default function ViewSpot() {
               </div>
               <div className="flex items-center gap-1">
                 <MapPin size={16} />
-                <span>Place, Kerala</span>
+                <span>{viewDetails.location}</span>
               </div>
             </div>
           </div>
@@ -55,16 +91,15 @@ export default function ViewSpot() {
   
             <h2 className="text-2xl font-bold mb-4">About this spot</h2>
             <p className="text-gray-600 leading-relaxed mb-8">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Similique
-              incidunt voluptatum, distinctio ipsum iste veritatis.
+              {viewDetails.description}
             </p>
   
             {/* 🖼️ GALLERY */}
             <h3 className="text-xl font-semibold mb-4">Gallery</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-12">
-              <img src="/cafearoma.jpg" className="rounded-2xl object-cover h-40 w-full" />
-              <img src="/cafearoma.jpg" className="rounded-2xl object-cover h-40 w-full" />
-              <img src="/cafearoma.jpg" className="rounded-2xl object-cover h-40 w-full" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 mb-12">
+              {viewDetails.galleryImages?.map(images=>(
+                <img key={images} src={`${serverURL}/uploads/${images}`} className="rounded object-cover h-40 w-full" />
+              ))}
             </div>
   
             {/* 💬 COMMENT TO ADMIN */}
@@ -99,28 +134,37 @@ export default function ViewSpot() {
   
           {/* RIGHT SIDEBAR */}
           <div className="bg-white rounded-3xl shadow p-6 h-fit">
-            <h3 className="text-lg font-semibold mb-4">Spot Info</h3>
+            <h3 className="text-xl font-bold mb-4">Spot Info</h3>
   
             <div className="space-y-4 text-sm text-gray-600">
-              <p><span className="font-medium text-black">Category:</span></p>
-              <p><span className="font-medium text-black">Location:</span></p>
-              <p><span className="font-medium text-black">Best Time:</span></p>
+              <p><span className="font-medium text-black">Category:<span className="text-xl ms-3 text-orange-600">{viewDetails.category}</span></span></p>
+              <p><span className="font-medium text-black">Location:<span className="text-xl ms-3 text-orange-600">{viewDetails.location}</span></span></p>
+              <p><span className="font-medium text-black">Best Time:<span className="text-xl ms-3 text-orange-600">{viewDetails.bestTime}</span></span></p>
             </div>
   
-            <div className="flex gap-3 mt-8">
-              <button className="flex-1 bg-orange-500 text-white py-2 rounded-full hover:bg-orange-600 transition">
-                Location
-              </button>
-              <button className="p-3 border rounded-full hover:bg-gray-100">
-                <Share2 />
-              </button>
+            <div >
+              {
+                role=="admin"?
+                <div className="flex gap-3 mt-8">
+                  <Link to={`/admin/spot/edit/${viewDetails._id}`} className="text-center flex-1 border border-orange-500 hover:bg-orange-500 text-orange-500 text-xl font-bold hover:text-white py-2 rounded-full bg-white transition">
+                  Edit
+                </Link>
+                </div>
+                :
+                <div className="flex gap-3 mt-8">
+                  <button className="flex-1 bg-orange-500 text-white py-2 rounded-full hover:bg-orange-600 transition">
+                  Location
+                </button>
+                <button className="p-3 border rounded-full hover:bg-gray-100">
+                  <Share2 />
+                </button>
+                </div>
+              }
             </div>
           </div>
         </div>
       </section>
-      :
-      <NotLogin/>
-      }
+      
     </>
   );
 }

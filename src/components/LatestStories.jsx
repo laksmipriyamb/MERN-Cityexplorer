@@ -1,41 +1,25 @@
 import { CirclePlus, Plus } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { getAllApprovedStoriesAPI } from "../server/allAPI";
+import serverURL from "../server/serverURL";
 
 function LatestStories() {
 
-  const [stories, setStories] = useState({
-    big: {
-      image: "/foods.jpg",
-      category: "FOOD AND DRINK",
-      title:
-        "Los Angeles food & drink guide: 10 things to try in Los Angeles, California",
-      date: "Aug 12, 2024 • 4 min read",
-    },
+  const [stories, setStories] = useState(null);
+  console.log(stories);
 
-    right1: {
-      image: "/shopping.jpg",
-      category: "SHOPPING",
-      title: "10 South London Markets You'll Love",
-      date: "Aug 15, 2024 • 5 min read",
-    },
+  useEffect(() => {
+    fetchStories()
+  }, [])
 
-    right2: {
-      image: "/hotels.jpg",
-      category: "HOTELS",
-      title: "10 incredible hotels around the world",
-      date: "Aug 15, 2024 • 5 min read",
-    },
-
-    right3: {
-      image: "/travel.jpg",
-      category: "TRAVEL BUDGET",
-      title: "Visiting Chicago on a Budget",
-      date: "Aug 15, 2024 • 5 min read",
-    },
-  });
-
-  // ===== SWAP FUNCTION =====
+  const formatDate = (date) =>
+    new Date(date).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  // swap function
   const swapStory = (key) => {
     setStories((prev) => ({
       ...prev,
@@ -43,6 +27,50 @@ function LatestStories() {
       [key]: prev.big,
     }));
   };
+
+  const fetchStories = async () => {
+    try {
+      const token = sessionStorage.getItem("token");
+      const reqHeader = {
+        "Authorization": `Bearer ${token}`
+      }
+
+      const result = await getAllApprovedStoriesAPI(reqHeader)
+
+      const data = result.data;
+
+      if (data.length >= 4) {
+        setStories({
+          big: data[0],
+          right1: data[1],
+          right2: data[2],
+          right3: data[3],
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const timeAgo = (dateString) => {
+    const seconds = Math.floor((new Date() - new Date(dateString)) / 1000);
+
+    const intervals = {
+      year: 31536000,
+      month: 2592000,
+      day: 86400,
+      hour: 3600,
+      minute: 60
+    };
+
+    for (let key in intervals) {
+      const value = Math.floor(seconds / intervals[key]);
+      if (value >= 1) {
+        return `${value} ${key}${value > 1 ? "s" : ""} ago`;
+      }
+    }
+    return "Just now";
+  };
+
 
   return (
     <section className="px-6 md:px-16 py-12 bg-[#faf7f2]">
@@ -55,7 +83,7 @@ function LatestStories() {
             See More Stories
           </Link>
           <Link to={'/addstory'} className="border flex px-3 py-2 hover:border-orange-500 text-white bg-orange-500 font-bold text-sm hover:bg-white hover:text-orange-500 transition">
-            Post Your Own Stories <CirclePlus className="md:ms-2 ms-1"/>
+            Post Your Own Stories <CirclePlus className="md:ms-2 ms-1" />
           </Link>
         </div>
       </div>
@@ -66,21 +94,28 @@ function LatestStories() {
         <div className="md:col-span-2">
           <div className="rounded-3xl overflow-hidden mb-4">
             <img
-              src={stories.big.image}
+              src={`${serverURL}/uploads/${stories?.big.uploadImage}`}
               className="w-full h-[380px] object-cover"
               alt="big story"
             />
           </div>
 
-          <p className="text-orange-500 text-xs font-semibold mb-2">
-            {stories.big.category}
+          <p className="text-orange-500 text-lg font-semibold mb-2">
+            {stories?.big.spotname}
           </p>
 
           <h3 className="text-2xl font-bold mb-3">
-            {stories.big.title}
+            {stories?.big.title}
           </h3>
+          <p className="text-gray-700 text-sm mb-2">{stories?.big.caption}</p>
 
-          <p className="text-gray-500 text-sm">{stories.big.date}</p>
+          <div className="flex justify-start items-center">
+            <div className="flex justify-start items-center">
+              <img width={'30px'} style={{borderRadius:'50%'}} src={`${serverURL}/uploads/${stories?.big.publisher?.picture}`} alt="profile" />
+              <p className="text-gray-700 text-sm ms-2 me-5">{stories?.big.publisher?.username}</p>
+            </div>
+            <div><p className="text-gray-500 text-sm">{timeAgo(stories?.big.createdAt)}</p></div>
+            </div>
         </div>
 
         {/* RIGHT STORIES */}
@@ -92,18 +127,20 @@ function LatestStories() {
             className="flex gap-4 cursor-pointer group"
           >
             <img
-              src={stories.right1.image}
+              src={`${serverURL}/uploads/${stories?.right1.uploadImage}`}
               className="w-24 h-24 rounded-2xl object-cover"
             />
             <div>
               <p className="text-orange-500 text-xs font-semibold">
-                {stories.right1.category}
+                {stories?.right1.spotname}
               </p>
               <h4 className="font-semibold group-hover:underline">
-                {stories.right1.title}
+                {stories?.right1.title}
               </h4>
+              <p className="text-gray-700 text-sm mb-2">{stories?.right1.caption}</p>
+
               <p className="text-gray-500 text-xs mt-1">
-                {stories.right1.date}
+                {timeAgo(stories?.right1.createdAt)}
               </p>
             </div>
           </div>
@@ -114,18 +151,20 @@ function LatestStories() {
             className="flex gap-4 cursor-pointer group"
           >
             <img
-              src={stories.right2.image}
+              src={`${serverURL}/uploads/${stories?.right2.uploadImage}`}
               className="w-24 h-24 rounded-2xl object-cover"
             />
             <div>
               <p className="text-orange-500 text-xs font-semibold">
-                {stories.right2.category}
+                {stories?.right2.spotname}
               </p>
               <h4 className="font-semibold group-hover:underline">
-                {stories.right2.title}
+                {stories?.right2.title}
               </h4>
+              <p className="text-gray-700 text-sm mb-2">{stories?.right2.caption}</p>
+
               <p className="text-gray-500 text-xs mt-1">
-                {stories.right2.date}
+                {timeAgo(stories?.right2.createdAt)}
               </p>
             </div>
           </div>
@@ -136,18 +175,20 @@ function LatestStories() {
             className="flex gap-4 cursor-pointer group"
           >
             <img
-              src={stories.right3.image}
+              src={`${serverURL}/uploads/${stories?.right3.uploadImage}`}
               className="w-24 h-24 rounded-2xl object-cover"
             />
             <div>
               <p className="text-orange-500 text-xs font-semibold">
-                {stories.right3.category}
+                {stories?.right3.spotname}
               </p>
               <h4 className="font-semibold group-hover:underline">
-                {stories.right3.title}
+                {stories?.right3.title}
               </h4>
+              <p className="text-gray-700 text-sm mb-2">{stories?.right3.caption}</p>
+
               <p className="text-gray-500 text-xs mt-1">
-                {stories.right3.date}
+                {timeAgo(stories?.right3.createdAt)}
               </p>
             </div>
           </div>

@@ -37,7 +37,7 @@ function Subscribe() {
 
           {/* BUTTON */}
           <button
-            onClick={() => navigate("/add/reviews")}
+            onClick={() => navigate("/add/review")}
             className="inline-flex items-center gap-3 px-10 py-4 rounded-full 
                        bg-orange-500 text-white font-semibold text-lg 
                        hover:bg-orange-600 hover:scale-105 transition"

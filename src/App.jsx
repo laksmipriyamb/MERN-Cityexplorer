@@ -24,6 +24,7 @@ import AllUsers from "./admin/pages-admin/AllUsers";
 
 
 import Footer from "./components/Footer";
+import Header from "./components/Header";
 
 function App() {
   const location = useLocation();
@@ -40,7 +41,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/allspots" element={<AllSpots />} />
-        <Route path="/viewspot" element={<ViewSpot />} />
+        <Route path="/viewspot/:id" element={<ViewSpot />} />
         <Route path="/addstory" element={<AddStory />} />
         <Route path="/allstories" element={<AllStories />} />
         <Route path="/profile" element={<Profile />} />
@@ -51,6 +52,7 @@ function App() {
         <Route path="/admin/home" element={<AdminHome />} />
         <Route path="/admin/addspot" element={<AdminAddSpot />} />
         <Route path="/admin/managespot" element={<AdminManageSpots />} />
+        <Route path="/admin/spot/edit/:id" element={<AdminAddSpot />} />
         <Route path="/admin/approve/stories" element={<AdminApproveStories />} />
         <Route path="/admin/feedbacks" element={<Feedbacks />} />
         <Route path="/admin/allusers" element={<AllUsers />} />
