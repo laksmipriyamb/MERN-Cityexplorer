@@ -20,6 +20,11 @@ export const getHomeSpotsAPI = async()=>{
     return await commonAPI("GET",`${serverURL}/topdestinations`,{})
 }
 
+//get home stories approved by admin
+export const getHomeApprovedStoriesAPI = async (reqHeader)=>{
+    return await commonAPI("GET",`${serverURL}/stories/home`,{},reqHeader)
+}
+
 // ------------------------------------------------
 //              Admin
 // ------------------------------------------------
@@ -57,6 +62,11 @@ export const getAllSpotsAPI = async (reqHeader)=>{
     return await commonAPI("GET",`${serverURL}/allspots`,{},reqHeader)
 }
 
+//get home reviews
+export const getHomeReviewsAPI = async()=>{
+    return await commonAPI("GET",`${serverURL}/home/reviews`,{})
+}
+
 //get spot details by id
 export const getSpotDetailsByIdAPI = async (id,reqHeader)=>{
     return await commonAPI("GET",`${serverURL}/spot/${id}/view`,{},reqHeader)
@@ -70,6 +80,29 @@ export const postStoryAPI = async (reqBody,reqHeader)=>{
 //get all stories approved by admin
 export const getAllApprovedStoriesAPI = async (reqHeader)=>{
     return await commonAPI("GET",`${serverURL}/stories/all`,{},reqHeader)
+}
+//get all stories pending
+export const getAllPendingStoriesAPI = async (reqHeader)=>{
+    return await commonAPI("GET",`${serverURL}/stories/all`,{},reqHeader)
+}
+// add review
+export const addReviewAPI = async (reqBody,reqHeader)=>{
+    return await commonAPI("POST",`${serverURL}/user/add/review`,reqBody,reqHeader)
+}
+
+//get all reviews
+export const getAllReviewsAPI = async (reqHeader)=>{
+    return await commonAPI("GET",`${serverURL}/reviews/all`,{},reqHeader)
+}
+
+//get all my reviews in profile page
+export const getMyReviewsAPI = async (reqHeader)=>{
+    return await commonAPI("GET",`${serverURL}/my/reviews`,{},reqHeader)
+}
+
+//delete review
+export const deleteReviewAPI = async (id,reqHeader)=>{
+    return await commonAPI("DELETE",`${serverURL}/reviews/${id}`,{},reqHeader)
 }
 
 //get user published stories
@@ -85,4 +118,23 @@ export const editUserAPI = async (id,reqBody,reqHeader)=>{
 //delete story
 export const removeStoryAPI = async (id,reqHeader)=>{
     return await commonAPI("DELETE",`${serverURL}/stories/${id}`,{},reqHeader)
+}
+//get all users
+export const getAllUsersAPI = async (reqHeader)=>{
+    return await commonAPI("GET",`${serverURL}/admin-users/all`,{},reqHeader)
+}
+
+//save or unsave spot
+export const saveSpotAPI = async (reqBody, reqHeader) => {
+  return await commonAPI("POST",`${serverURL}/spot/save`,reqBody,reqHeader)
+}
+
+// get saved spots
+export const getSavedSpotsAPI = async (reqHeader) => {
+  return await commonAPI("GET",`${serverURL}/spot/saved`,"",reqHeader)
+}
+
+//send message
+export const addMessageAPI = async (reqBody, reqHeader) => {
+  return await commonAPI("POST",`${serverURL}/message/add`,reqBody,reqHeader)
 }

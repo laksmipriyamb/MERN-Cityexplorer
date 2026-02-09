@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { editUserAPI } from '../server/allAPI'
 import { toast, ToastContainer } from 'react-toastify'
+import serverURL from '../server/serverURL'
 
 function EditProfile() {
     const [userDetails, setUserDetails] = useState({

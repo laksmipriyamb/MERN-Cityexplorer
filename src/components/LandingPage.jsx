@@ -14,7 +14,7 @@ function LandingPage() {
             UNSEEN CITY.
           </h1>
           <p className="mt-4 text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed">
-            Uncover the city beyond the obvious. From hidden cafés to local
+            Uncover the city beyond the obvious. From hidden cafes to local
             stories, every corner has a secret. Explore like you belong here.
           </p>
         </div>

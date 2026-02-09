@@ -4,8 +4,10 @@ import { FaSearch } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import serverURL from '../server/serverURL';
 import { LogOutIcon } from 'lucide-react';
+import AboutUs from '../components/AboutUs'
 
 function HeadPortion() {
+  const [showAbout, setShowAbout] = useState(false);
     const [dp, setDp] = useState("")
       const [token, setToken] = useState("")
     
@@ -53,7 +55,7 @@ function HeadPortion() {
           <div className="hidden md:flex items-center gap-6 lg:gap-8">
             <Link to={'/'} className="nav-link">HOME</Link>
             <Link to={'/allspots'} className="nav-link">DESTINATIONS</Link>
-            <Link className="nav-link">ABOUT US</Link>
+            <button onClick={() => setShowAbout(true)} className="nav-link">ABOUT US</button>
             <Link to={'/allstories'} className="nav-link">BLOGS</Link>
             
           </div>
@@ -79,6 +81,7 @@ function HeadPortion() {
             }
           </div>
         </div>
+        <AboutUs open={showAbout} onClose={() => setShowAbout(false)}/>
       </header>
   )
 }

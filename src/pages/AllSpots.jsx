@@ -3,7 +3,7 @@ import { Search, MapPin, Star, Bookmark, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import NotLogin from "../components/NotLogin";
-import { getAllSpotsAPI } from "../server/allAPI";
+import { getAllSpotsAPI, saveSpotAPI } from "../server/allAPI";
 import serverURL from "../server/serverURL";
 import HeadPortion from "../components/HeadPortion";
 
@@ -14,6 +14,7 @@ export default function AllSpots() {
   const navigate = useNavigate();
   const [token, setToken] = useState("")
   const [allSpots, setAllSpots] = useState([])
+  const [savedSpotIds, setSavedSpotIds] = useState([])
   console.log(allSpots);
 
 
@@ -38,7 +39,32 @@ export default function AllSpots() {
     }
   }
 
-  
+  //save or unsave
+  const handleSaveSpot = async (e, spotId) => {
+    e.stopPropagation()
+
+    const reqHeader = {
+      Authorization: `Bearer ${token}`
+    }
+
+    const reqBody = { spotId }
+
+    const result = await saveSpotAPI(reqBody, reqHeader)
+
+    if (result.status === 200) {
+      alert(result.data.message)
+      setSavedSpotIds((prev) =>
+        prev.includes(spotId)
+          ? prev.filter((id) => id !== spotId)
+          : [...prev, spotId]
+      )
+    } else {
+      console.log(result)
+    }
+  }
+
+
+
   const filteredSpots = allSpots.filter((spot) => {
     const categoryMatch =
       activeCategory === "All" || spot.category.toLowerCase() === activeCategory.toLowerCase();
@@ -53,7 +79,7 @@ export default function AllSpots() {
 
   return (
     <>
-    <HeadPortion/>
+      <HeadPortion />
       {/* login-user */}
       {
         token ?
@@ -140,9 +166,15 @@ export default function AllSpots() {
                         </div>
 
                         <div className="flex items-center gap-1 text-orange-500">
-                          <Heart className="text-red-600" />
-                          <span className="text-sm font-medium">{spot.likes?.length || 0}</span>
-                          <div className="ms-auto flex justify-between gap-2"><Bookmark className="text-black" /></div>
+                          <div className="ms-auto flex justify-between gap-2">
+                            <button onClick={(e) => handleSaveSpot(e, spot?._id)}>
+                              {savedSpotIds.includes(spot?._id) ? (
+                                <Bookmark className="text-orange-500 fill-orange-500" />
+                              ) : (
+                                <Bookmark className="text-black" />
+                              )}
+                            </button>
+                          </div>
 
                         </div>
                       </div>

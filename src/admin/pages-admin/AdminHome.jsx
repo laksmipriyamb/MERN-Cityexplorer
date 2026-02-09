@@ -1,14 +1,91 @@
-import { useState } from "react";
-import {Users,MapPin,ClipboardCheck,MessageSquareText,BarChart3,ShieldCheck,LayoutDashboard,X,PlusCircle} from "lucide-react";
+import { useEffect, useState } from "react";
+import {Users,MapPin,ClipboardCheck,MessageSquareText,BarChart3,ShieldCheck,LayoutDashboard,X,PlusCircle, ChartBar, ChartColumnIncreasing} from "lucide-react";
 import { Link } from "react-router-dom";
+import { getAllApprovedStoriesAPI, getAllPendingStoriesAPI, getAllSpotsAPI, getAllStoriesAdminAPI, getAllUsersAPI } from "../../server/allAPI";
 
 export default function AdminHome() {
   const [openSidebar, setOpenSidebar] = useState(false);
+  const [allUsers, setAllUsers] = useState([]);
+  const [allSpots, setAllSpots] = useState([]);
+  const [allStories, setAllStories] = useState([]);
+  const [allStoriesPending, setAllStoriesPending] = useState([]);
+
+  console.log(allUsers);
+  console.log(allSpots);
+  console.log(allStories);
+  console.log(allStoriesPending);
+  
+  useEffect(()=>{
+    const token = sessionStorage.getItem("token")
+    if(token){
+      getAllUsers(token)
+      getAllStories(token)
+      getAllSpots(token)
+      getAllPendingStories(token)
+    }
+  },[])
+  
+  const getAllUsers = async (token) => {
+      const reqHeader = {
+        'Authorization': `Bearer ${token}`
+      }
+      //api call
+      
+      const result = await getAllUsersAPI(reqHeader)
+      if (result.status == 200) {
+        setAllUsers(result.data)
+      } else {
+        console.log(result);
+      }
+    }
+
+    const getAllStories = async (token) => {
+      const reqHeader = {
+        'Authorization': `Bearer ${token}`
+      }
+      //api call
+      
+      const result = await getAllApprovedStoriesAPI(reqHeader)
+      if (result.status == 200) {
+        setAllStories(result.data)
+      } else {
+        console.log(result);
+      }
+    }
+
+    const getAllSpots = async (token) => {
+      const reqHeader = {
+        'Authorization': `Bearer ${token}`
+      }
+      //api call
+      
+      const result = await getAllSpotsAPI(reqHeader)
+      if (result.status == 200) {
+        setAllSpots(result.data)
+      } else {
+        console.log(result);
+      }
+    }
+
+     const getAllPendingStories = async (token) => {
+      const reqHeader = {
+        'Authorization': `Bearer ${token}`
+      }
+      //api call
+      
+      const result = await getAllPendingStoriesAPI(reqHeader)      
+      if (result.status == 200) {
+        setAllStoriesPending(result.data)
+      } else {
+        console.log(result);
+      }
+    }
+  
 
   return (
     <div className="min-h-screen bg-[#f6f7fb] relative">
 
-      {/* 👤 FLOATING PROFILE IMAGE */}
+      {/* FLOATING PROFILE IMAGE */}
       {!openSidebar && (
         <div style={{ marginBottom: '-60px' }} className="pt-8 ps-5">
           <img
@@ -19,7 +96,7 @@ export default function AdminHome() {
         </div>
       )}
 
-      {/* 🌑 OVERLAY */}
+      {/*  OVERLAY */}
       {openSidebar && (
         <div
           onClick={() => setOpenSidebar(false)}
@@ -27,7 +104,7 @@ export default function AdminHome() {
         />
       )}
 
-      {/* 🔶 SIDEBAR */}
+      {/*  SIDEBAR */}
       <div
         className={`fixed top-0 left-0 z-30 min-h-screen w-64
         bg-gradient-to-b from-orange-500 to-orange-600 text-white px-6 py-8
@@ -35,24 +112,24 @@ export default function AdminHome() {
         ${openSidebar ? "translate-x-0" : "-translate-x-full"}`}
       >
 
-        {/* ❌ CLOSE */}
+        {/*  CLOSE */}
         <div className="flex justify-end mb-6">
           <X className="cursor-pointer" onClick={() => setOpenSidebar(false)} />
         </div>
 
-        {/* 👤 ADMIN INFO */}
+        {/*  ADMIN INFO */}
         <div className="flex items-center gap-4 mb-12">
           <img
-            src="/admin.jpg"
+            src="https://img.freepik.com/premium-vector/support-admin-icon-glyph-style-vector-eps_965649-13140.jpg"
             className="w-12 h-12 rounded-full border-2 border-white object-cover"
           />
           <div>
             <p className="font-semibold">Admin</p>
-            <p className="text-xs opacity-80">admin@spotscape.com</p>
+            <p className="text-xs opacity-80">admin@cityexplorer.com</p>
           </div>
         </div>
 
-        {/* 📌 LINKS */}
+        {/*  LINKS */}
         <div className="space-y-5 text-sm">
           <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-white/20">
             <LayoutDashboard size={18} /> Dashboard
@@ -63,7 +140,7 @@ export default function AdminHome() {
           </div>
 
           <div className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-white/20 cursor-pointer">
-            <MapPin size={18} /> <Link to={'/admin/managespot'}>Manage Spots</Link>
+            <MapPin size={18} /> <Link to={'/admin/managespot'}>Update or Delete Spots</Link>
           </div>
 
           <div className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-white/20 cursor-pointer">
@@ -93,46 +170,47 @@ export default function AdminHome() {
           </p>
         </div>
 
-        {/* 📊 STATS (DIV BASED) */}
+        {/*  STATS (DIV BASED) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
 
-          <div className="bg-white p-6 rounded-3xl shadow flex items-center gap-4">
+          <div className="bg-white p-6  shadow flex items-center gap-4">
             <div className="p-3 rounded-full bg-orange-100 text-orange-500">
               <Users />
             </div>
             <div>
               <p className="text-sm text-gray-500">Total Users</p>
-              <p className="text-2xl font-bold">1,248</p>
+              <p className="text-7xl font-bold">{allUsers?.length}</p>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-3xl shadow flex items-center gap-4">
+          <div className="bg-white p-6  shadow flex items-center gap-4">
             <div className="p-3 rounded-full bg-orange-100 text-orange-500">
               <MapPin />
             </div>
             <div>
               <p className="text-sm text-gray-500">Total Spots</p>
-              <p className="text-2xl font-bold">312</p>
+              <p className="text-7xl font-bold">{allSpots?.length}</p>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-3xl shadow flex items-center gap-4">
+          <div className="bg-white p-6  shadow flex items-center gap-4">
             <div className="p-3 rounded-full bg-orange-100 text-orange-500">
               <ShieldCheck />
             </div>
             <div>
               <p className="text-sm text-gray-500">Approved Stories</p>
-              <p className="text-2xl font-bold">1,432</p>
+              <p className="text-7xl font-bold">{allStories?.length}</p>
             </div>
           </div>
 
-          <div className="bg-orange-500 p-6 rounded-3xl shadow flex items-center gap-4 text-white">
+          <div className="bg-orange-500 p-6 shadow flex items-center gap-4 text-white">
             <div className="p-3 rounded-full bg-white/20">
               <ClipboardCheck />
             </div>
             <div>
               <p className="text-sm">Pending Stories</p>
-              <p className="text-2xl font-bold">27</p>
+                <p className="text-7xl font-bold">{allStoriesPending?.length}</p>
+                
             </div>
           </div>
         </div>
@@ -140,17 +218,17 @@ export default function AdminHome() {
         {/* 📈 CONTENT */}
         <div className="grid lg:grid-cols-3 gap-8">
 
-          <div className="lg:col-span-2 bg-white rounded-3xl shadow p-6">
+          <div className="lg:col-span-2 bg-white  shadow p-6">
             <h3 className="font-semibold mb-4 flex items-center gap-2">
               <BarChart3 className="text-orange-500" />
               Platform Activity
             </h3>
             <div className="h-64 rounded-xl bg-gradient-to-br from-orange-100 to-orange-50 flex items-center justify-center text-gray-400">
-              Chart Area
+            <ChartColumnIncreasing size={200} className="text-orange-600" />
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl shadow p-6 flex flex-col items-center justify-center">
+          <div className="bg-white  shadow p-6 flex flex-col items-center justify-center">
             <div className="w-40 h-40 rounded-full bg-orange-100 flex items-center justify-center mb-4">
               <div className="w-24 h-24 rounded-full bg-orange-500 text-white flex items-center justify-center text-xl font-bold">
                 78%

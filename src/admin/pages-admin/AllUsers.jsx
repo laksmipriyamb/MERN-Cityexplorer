@@ -1,27 +1,35 @@
 import { User, Mail, ShieldCheck, Trash2, Ban } from "lucide-react";
+import { useEffect, useState } from "react";
+import { getAllUsersAPI } from "../../server/allAPI";
+import serverURL from "../../server/serverURL";
 
 export default function AllUsers() {
   // Dummy data – replace with API
-  const users = [
-    {
-      id: 1,
-      name: "Anu Thomas",
-      email: "anu.thomas@gmail.com",
-      role: "User",
-    },
-    {
-      id: 2,
-      name: "Rahul S",
-      email: "rahul.s@gmail.com",
-      role: "User",
-    },
-    {
-      id: 3,
-      name: "Admin",
-      email: "admin@spotscape.com",
-      role: "Admin",
-    },
-  ];
+  const [allUsers,setAllUsers] = useState([])
+
+  console.log(allUsers);
+  
+  useEffect(()=>{
+    const token = sessionStorage.getItem("token")
+    if(token){
+      getAllUsers(token)
+    }
+  },[])
+
+  const getAllUsers = async (token) => {
+    const reqHeader = {
+      'Authorization': `Bearer ${token}`
+    }
+    //api call
+    //setAllUsers with response data
+    const result = await getAllUsersAPI(reqHeader)
+    if (result.status == 200) {
+      setAllUsers(result.data)
+    } else {
+      console.log(result);
+    }
+  }
+ 
 
   return (
     <section
@@ -59,26 +67,26 @@ export default function AllUsers() {
 
           {/* USERS GRID */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {users.map((user) => (
+            {allUsers.map((user) => (
               <div
-                key={user.id}
+                key={user?._id}
                 className="rounded-xl border shadow-sm hover:shadow-md transition p-5 space-y-4"
               >
                 {/* USER ICON */}
                 <div className="w-14 h-14 flex items-center justify-center
                   rounded-full bg-orange-100 text-orange-600">
-                  <User />
+                  <img width={'60px'} style={{borderRadius:'50%'}} src={`${serverURL}/uploads/${user?.picture}`} alt="profile" />
                 </div>
 
                 {/* NAME */}
                 <h3 className="text-lg font-semibold text-gray-800">
-                  {user.name}
+                  {user?.username}
                 </h3>
 
                 {/* EMAIL */}
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <Mail size={16} className="text-orange-500" />
-                  {user.email}
+                  {user?.email}
                 </div>
 
                 
@@ -87,7 +95,7 @@ export default function AllUsers() {
           </div>
 
           {/* EMPTY STATE */}
-          {users.length === 0 && (
+          {allUsers.length === 0 && (
             <div className="text-center py-20 text-gray-500">
               No users found.
             </div>

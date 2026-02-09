@@ -220,7 +220,7 @@ export default function AdminAddSpot() {
       {/* HEADER */}
       <div className="relative max-w-4xl mx-auto mb-10 border-l-4 border-orange-600 pl-4">
         <h1 className="text-3xl font-semibold text-gray-900">
-          {isEdit ? "Edit Spot" : " Add New Spot"}
+          {isEdit ? "Update Spot" : " Add New Spot"}
         </h1>
         <p className="text-gray-700 mt-2">
           Create and publish cafes, restaurants, hotels & tourist places.

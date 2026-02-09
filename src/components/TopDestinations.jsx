@@ -116,10 +116,7 @@ function TopDestinations() {
                                         </div>
                                         <p className="font-semibold">{spot?.spotname}</p>
                                         <p className="text-sm text-gray-500">{spot?.location}</p>
-                                        <div className="flex justify-between">
-                                            <p className="text-orange-500">★★★★★</p>
-                                            <div className=" flex justify-end gap-2"><Bookmark className="text-black" /><Heart className="text-red-600" /></div>
-                                        </div>
+                                        
                                     </div>
                                 ))
 

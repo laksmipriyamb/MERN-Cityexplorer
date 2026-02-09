@@ -7,8 +7,9 @@ import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import { Link } from "react-router-dom";
 import Tooltip from "@mui/material/Tooltip";
 import serverURL from "../server/serverURL";
-
+import AboutUs from '../components/AboutUs'
 function Header() {
+  const [showAbout, setShowAbout] = useState(false);
   const [open, setOpen] = useState(false);
   const [dp, setDp] = useState("")
   const [token, setToken] = useState("")
@@ -32,13 +33,13 @@ function Header() {
 
   return (
     <>
-      {/* ================= MENU ICON (OUTSIDE HEADER) ================= */}
+      {/* MENU ICON (OUTSIDE HEADER) */}
       <MdOutlineKeyboardArrowRight
         className="fixed top-7 md:top-12 md:left-4 shadow-lg border border-white sm:top-6 sm:left-6 text-3xl sm:text-4xl cursor-pointer z-50 hover:text-orange-500"
         onClick={() => setOpen(true)}
       />
 
-      {/* ================= HEADER ================= */}
+      {/* HEADER */}
       <header className="fixed top-4 sm:top-6 ms-5 md:ms-0  left-1/2 -translate-x-1/2 z-40 w-full">
         <div
           className="
@@ -64,7 +65,7 @@ function Header() {
           {/* NAV LINKS (DESKTOP ONLY) */}
           <div className="hidden md:flex items-center gap-6 lg:gap-8">
             <Link to={'/allspots'} className="nav-link">DESTINATIONS</Link>
-            <Link className="nav-link">ABOUT US</Link>
+            <button onClick={() => setShowAbout(true)} className="nav-link">ABOUT US</button>
             <Link to={'/allstories'} className="nav-link">BLOGS</Link>
             <Link onClick={(e) => {
               e.preventDefault();
@@ -95,7 +96,7 @@ function Header() {
         </div>
       </header>
 
-      {/* ================= OVERLAY ================= */}
+      {/* OVERLAY */}
       {open && (
         <div
           className="fixed inset-0 z-40"
@@ -103,7 +104,7 @@ function Header() {
         />
       )}
 
-      {/* ================= SIDEBAR ================= */}
+      {/* SIDEBAR */}
       <aside
         className={`
           fixed top-0 left-0 h-screen
@@ -136,6 +137,10 @@ function Header() {
 
       {/* PAGE OFFSET */}
       <div className="h-24 sm:h-32"></div>
+      <AboutUs
+  open={showAbout}
+  onClose={() => setShowAbout(false)}
+/>
     </>
   );
 }

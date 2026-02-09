@@ -6,10 +6,14 @@ import { useState } from "react";
 import { getAllApprovedStoriesAPI } from "../server/allAPI";
 import serverURL from "../server/serverURL";
 import HeadPortion from "../components/HeadPortion";
+import axios from "axios";
+
 
 export default function AllStories() {
   const [token, setToken] = useState("")
   const [allStories, setAllStories] = useState([])
+
+  console.log(allStories);
 
   useEffect(() => {
     if (sessionStorage.getItem("token")) {
@@ -54,10 +58,45 @@ export default function AllStories() {
   };
 
 
+  //like story
+
+  const likeStory = async (id) => {
+    const token = sessionStorage.getItem("token");
+
+    try {
+      const res = await axios.put(
+        `${serverURL}/story/like/${id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      const { totalLikes, liked } = res.data;
+
+      setAllStories((prevStories) =>
+        prevStories.map((story) =>
+          story._id === id
+            ? {
+              ...story,
+              totalLikes: totalLikes,
+              isLiked: liked
+            }
+            : story
+        )
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+
 
   return (
     <>
-    <HeadPortion/>
+      <HeadPortion />
       {token ?
         <section className="relative min-h-screen px-4 py-16 bg-[#faf7f2] overflow-hidden">
 
@@ -106,12 +145,13 @@ export default function AllStories() {
                     <h3 className="font-semibold text-sm mb-2 mt-4 truncate">
                       {allStories.title}
                     </h3>
-                    <div className="flex flex-col items-center mt-3"><Heart className="text-red-600" />
-                      {allStories?.likes.length > 0 ?
-                        <p className="text-xs text-gray-700">{allStories?.likes.length}</p>
+                    {/* <div className="flex flex-col items-center mt-3"><button onClick={() => likeStory(allStories._id)}><Heart className={`cursor-pointer ${allStories.isLiked ? "text-red-600 fill-red-600" : "text-red-400"
+                      }`} /></button>
+                      {allStories?.totalLikes > 0 ?
+                        <p className="text-xs text-gray-700">{allStories?.totalLikes}</p>
                         :
                         <p className="text-xs text-gray-700">0</p>
-                      }</div>
+                      }</div> */}
                   </div>
                   {/* TIME */}
                   <div className="flex items-center gap-1 text-xs text-gray-400 mt-2">
