@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Star, Trash, Trash2, TrashIcon } from "lucide-react";
 import serverURL from "../server/serverURL";
-import { getMyReviewsAPI } from "../server/allAPI";
+import { deleteReviewAPI, getMyReviewsAPI } from "../server/allAPI";
 
 function ProfileReviews() {
   const [reviews, setReviews] = useState([]);
@@ -22,6 +22,22 @@ function ProfileReviews() {
       setReviews(result.data);
     }
   };
+
+  const deleteReview = async (id) => {
+      const token = sessionStorage.getItem("token")
+      if (token) {
+        const reqHeader = {
+          "Authorization": `Bearer ${token}`
+        }
+        const result = await deleteReviewAPI(id, reqHeader)
+        if (result.status == 200) {
+          getMyReviews()
+        } else {
+          console.log(result);
+  
+        }
+      }
+    }
 
   const timeAgo = (dateString) => {
     const seconds = Math.floor((new Date() - new Date(dateString)) / 1000);
@@ -106,7 +122,7 @@ function ProfileReviews() {
 
                 {/* TIME */}
                 <div className="flex items-center">
-                  <button><Trash2 className="text-red-600 me-4"/></button>
+                  <button onClick={() => { deleteReview(review?._id) }}><Trash2 className="text-red-600 me-4"/></button>
                   <p className="text-sm text-gray-400">
                     {timeAgo(review.createdAt)}
                   </p>

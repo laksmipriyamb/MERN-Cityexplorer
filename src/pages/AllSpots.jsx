@@ -6,6 +6,7 @@ import NotLogin from "../components/NotLogin";
 import { getAllSpotsAPI, saveSpotAPI } from "../server/allAPI";
 import serverURL from "../server/serverURL";
 import HeadPortion from "../components/HeadPortion";
+import { toast, ToastContainer } from "react-toastify";
 
 
 export default function AllSpots() {
@@ -52,7 +53,7 @@ export default function AllSpots() {
     const result = await saveSpotAPI(reqBody, reqHeader)
 
     if (result.status === 200) {
-      alert(result.data.message)
+      toast.dark(result.data.message)
       setSavedSpotIds((prev) =>
         prev.includes(spotId)
           ? prev.filter((id) => id !== spotId)
@@ -190,6 +191,9 @@ export default function AllSpots() {
       }
       {/*not login-user */}
 
+{/* toast */}
+        <ToastContainer position="top-center" autoClose={2000} theme="colored" />
+  
     </>
   );
 }

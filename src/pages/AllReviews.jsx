@@ -33,21 +33,21 @@ export default function AllReviews() {
     }
   }
 
-  const deleteReview = async (id) => {
-    const token = sessionStorage.getItem("token")
-    if (token) {
-      const reqHeader = {
-        "Authorization": `Bearer ${token}`
-      }
-      const result = await deleteReviewAPI(id, reqHeader)
-      if (result.status == 200) {
-        getAllReviews()
-      } else {
-        console.log(result);
+  // const deleteReview = async (id) => {
+  //   const token = sessionStorage.getItem("token")
+  //   if (token) {
+  //     const reqHeader = {
+  //       "Authorization": `Bearer ${token}`
+  //     }
+  //     const result = await deleteReviewAPI(id, reqHeader)
+  //     if (result.status == 200) {
+  //       getAllReviews()
+  //     } else {
+  //       console.log(result);
 
-      }
-    }
-  }
+  //     }
+  //   }
+  // }
 
   const timeAgo = (dateString) => {
     const seconds = Math.floor((new Date() - new Date(dateString)) / 1000);
